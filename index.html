@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>نظام محاسبة من تطوير علي المضيوي </title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+ --accent:#2563eb;
+ --accent2:#22c55e;
+ --danger:#dc2626;
+ --text:#e5e7eb;
+}
+body{
+ margin:0;
+ font-family:'Cairo',Tahoma;
+ background:linear-gradient(135deg,#0a0f1f,#111827);
+ color:var(--text);
+}
+header{
+ background:#0a0f1f;
+ padding:18px;
+ display:flex;
+ justify-content:space-between;
+}
+.navbar{
+ display:flex;
+ gap:10px;
+ padding:12px;
+ background:#0a0f1f;
+ justify-content:center;
+ flex-wrap:wrap;
+}
+.navbar button{
+ padding:10px 20px;
+ border:none;
+ border-radius:30px;
+ background:#1e293b;
+ color:#fff;
+ cursor:pointer;
+ font-weight:bold;
+}
+main{padding:20px}
+.cards{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+ gap:20px;
+}
+.card{
+ background:#111827;
+ padding:20px;
+ border-radius:20px;
+}
+.card h4{margin:0;color:#38bdf8}
+.big{font-size:26px;font-weight:bold;margin-top:12px;}
+input{
+ width:100%;
+ padding:12px;
+ margin:6px 0;
+ border-radius:12px;
+ border:none;
+ background:#0a0f1f;
+ color:#fff;
+}
+.btn{
+ padding:10px 18px;
+ border:none;
+ border-radius:25px;
+ cursor:pointer;
+ font-weight:bold;
+ color:#fff;
+}
+.btn.add{background:var(--accent);}
+.btn.del{background:var(--danger);}
+.btn.edit{background:var(--accent2);}
+table{
+ width:100%;
+ margin-top:15px;
+ border-collapse:collapse;
+ background:#0a0f1f;
+}
+th,td{
+ padding:12px;
+ border-bottom:1px solid #1e293b;
+ text-align:center;
+}
+th{color:#38bdf8}
+
+/* شاشة تسجيل الدخول فقط */
+#login{
+ max-width:360px;
+ margin:120px auto;
+ background:#111827;
+ padding:25px;
+ border-radius:20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- تسجيل الدخول -->
+<div id="login">
+ <h3 style="text-align:center">🔐 تسجيل الدخول</h3>
+ <input id="user" placeholder="اسم المستخدم">
+ <input id="phone" placeholder="رقم الهاتف">
+ <button class="btn add" onclick="login()">دخول</button>
+ <div id="err" style="color:#dc2626;text-align:center;margin-top:10px"></div>
+</div>
+
+<!-- التطبيق الأصلي -->
+<div id="app" style="display:none">
+
+<header>
+ <div>📊 نظام محاسبة من تطوير علي المضيوي  VIP</div>
+ <div>نسخة عامة</div>
+</header>
+
+<div class="navbar">
+ <button onclick="show('dash')">لوحة التحكم</button>
+ <button onclick="show('store')">المخزن</button>
+ <button onclick="show('debts')">فلوس ليّا</button>
+ <button onclick="show('maintenance')">أرباح الصيانة</button>
+</div>
+
+<main id="content"></main>
+
+</div>
+
+<script>
+/* تسجيل الدخول – الإضافة الوحيدة */
+function login(){
+ if(
+  document.getElementById("user").value==="ali" &&
+  document.getElementById("phone").value==="01152800730"
+ ){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  dashboard();
+ }else{
+  document.getElementById("err").innerText="❌ بيانات غير صحيحة";
+ }
+}
+
+/* ===== الكود الأصلي بدون أي تعديل ===== */
+
+const content=document.getElementById("content");
+
+let data=JSON.parse(localStorage.getItem("acc_data"))||{
+ cash:0,store:[],debts:[],maintenance:[],shortage:[]
+};
+function save(){localStorage.setItem("acc_data",JSON.stringify(data));}
+
+function show(s){
+ if(s=="dash")dashboard();
+ if(s=="store")storeUI();
+ if(s=="shortage")shortageUI();
+ if(s=="debts")debtsUI();
+ if(s=="maintenance")maintUI();
+ if(s=="cash")cashUI();
+}
+
+/* Dashboard */
+function dashboard(){
+ let storeVal=data.store.reduce(
+  (a,b)=>a+(b.qty*((b.buy??b.price) || 0)),0
+ );
+ let debts=data.debts.reduce((a,b)=>a+b.amount,0);
+ let maint=data.maintenance.reduce((a,b)=>a+(b.sell-b.cost),0);
+ content.innerHTML=`
+  <div class="card"><h4>قيمة المخزون</h4><div class="big">${storeVal} ج</div></div>
+  <div class="card"><h4>مكسب الصيانة</h4><div class="big">${maint} ج</div></div>
+  <div class="card"><h4>فلوس ليّا</h4><div class="big">${debts} ج</div></div>
+ `;
+}
+
+/* Store */
+function storeUI(){
+ content.innerHTML=`
+ <h3>📦 المخزن</h3>
+ <input id="p" placeholder="اسم الصنف">
+ <input id="q" placeholder="الكمية">
+ <input id="pr" placeholder="سعر الجملة">
+ <input id="ps" placeholder="سعر البيع">
+ <button class="btn add" onclick="addStore()">➕ إضافة</button>
+ <table>
+ <tr><th>الصنف</th><th>كمية</th><th>جملة</th><th>بيع</th><th>تعديل</th><th>حذف</th></tr>
+ ${data.store.map((x,i)=>`
+ <tr>
+  <td>${x.name}</td>
+  <td>${x.qty}</td>
+  <td>${x.buy ?? x.price}</td>
+  <td>${x.sell ?? "-"}</td>
+  <td><button class="btn edit" onclick="editStore(${i})">✎</button></td>
+  <td><button class="btn del" onclick="data.store.splice(${i},1);save();storeUI()">✖</button></td>
+ </tr>`).join("")}
+ </table>`;
+}
+function addStore(){
+ data.store.push({
+  name:p.value,
+  qty:+q.value,
+  buy:+pr.value,
+  sell:+ps.value
+ });
+ save();storeUI();
+}
+function editStore(i){
+ let it=data.store[i];
+ let n=prompt("اسم الصنف",it.name);
+ let q=+prompt("الكمية",it.qty);
+ let b=+prompt("سعر الجملة",it.buy ?? it.price);
+ let s=+prompt("سعر البيع",it.sell ?? 0);
+ if(n){
+  data.store[i]={name:n,qty:q,buy:b,sell:s};
+  save();storeUI();
+ }
+}
+
+/* Shortage */
+function shortageUI(){
+ content.innerHTML=`
+ <h3>📉 النواقص</h3>
+ <input id="sn" placeholder="اسم المنتج">
+ <input id="sb" placeholder="سعر الجملة التقريبي">
+ <button class="btn add" onclick="addShort()">➕ إضافة</button>
+ <table>
+ <tr><th>المنتج</th><th>سعر الجملة</th><th>تعديل</th><th>حذف</th></tr>
+ ${data.shortage.map((x,i)=>`
+ <tr>
+  <td>${x.name}</td>
+  <td>${x.buy}</td>
+  <td><button class="btn edit" onclick="editShort(${i})">✎</button></td>
+  <td><button class="btn del" onclick="data.shortage.splice(${i},1);save();shortageUI()">✖</button></td>
+ </tr>`).join("")}
+ </table>`;
+}
+function addShort(){
+ if(!sn.value) return;
+ data.shortage.push({name:sn.value,buy:+sb.value});
+ save();shortageUI();
+}
+function editShort(i){
+ let it=data.shortage[i];
+ let n=prompt("اسم المنتج",it.name);
+ let b=+prompt("سعر الجملة",it.buy);
+ if(n){
+  data.shortage[i]={name:n,buy:b};
+  save();shortageUI();
+ }
+}
+
+/* Debts */
+function debtsUI(){
+ content.innerHTML=`
+ <h3>💰 فلوس ليّا</h3>
+ <input id="n" placeholder="الاسم">
+ <input id="a" placeholder="المبلغ">
+ <button class="btn add" onclick="addDebt()">إضافة</button>
+ <table>
+ <tr><th>الاسم</th><th>المبلغ</th><th>تعديل</th><th>حذف</th></tr>
+ ${data.debts.map((x,i)=>`
+ <tr>
+  <td>${x.name}</td>
+  <td>${x.amount}</td>
+  <td><button class="btn edit" onclick="editDebt(${i})">✎</button></td>
+  <td><button class="btn del" onclick="data.debts.splice(${i},1);save();debtsUI()">✖</button></td>
+ </tr>`).join("")}
+ </table>`;
+}
+function addDebt(){
+ data.debts.push({name:n.value,amount:+a.value});
+ save();debtsUI();
+}
+function editDebt(i){
+ let it=data.debts[i];
+ let n=prompt("الاسم",it.name);
+ let a=+prompt("المبلغ",it.amount);
+ if(n){
+  data.debts[i]={name:n,amount:a};
+  save();debtsUI();
+ }
+}
+
+/* Maintenance */
+function maintUI(){
+ content.innerHTML=`
+ <h3>🧰 أرباح الصيانة</h3>
+ <input id="pc" placeholder="اسم القطعة">
+ <input id="c" placeholder="سعر  جملة">
+ <input id="s" placeholder="سعر البيع">
+ <button class="btn add" onclick="addMaint()">➕ إضافة</button>
+ <table>
+ <tr><th>القطعة</th><th>جملة</th><th>بيع</th><th>المكسب</th><th>تعديل</th><th>حذف</th></tr>
+ ${data.maintenance.map((x,i)=>`
+ <tr>
+  <td>${x.part}</td>
+  <td>${x.cost}</td>
+  <td>${x.sell}</td>
+  <td>${x.sell-x.cost}</td>
+  <td><button class="btn edit" onclick="editMaint(${i})">✎</button></td>
+  <td><button class="btn del" onclick="data.maintenance.splice(${i},1);save();maintUI()">✖</button></td>
+ </tr>`).join("")}
+ </table>`;
+}
+function addMaint(){
+ data.maintenance.push({
+  part:pc.value,
+  cost:+c.value,
+  sell:+s.value
+ });
+ data.cash+=+s.value;
+ save();maintUI();
+}
+function editMaint(i){
+ let it=data.maintenance[i];
+ let p=prompt("اسم القطعة",it.part);
+ let c=+prompt("جملة",it.cost);
+ let s=+prompt("بيع",it.sell);
+ if(p){
+  data.maintenance[i]={part:p,cost:c,sell:s};
+  save();maintUI();
+ }
+}
+</script>
+
+</body>
+</html>
+
