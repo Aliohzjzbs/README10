@@ -505,11 +505,16 @@ function dailyUI(){
 }
 
 function addDaily(){
+ let dnEl = document.getElementById("dn");
+ let dqEl = document.getElementById("dq");
+ let dpEl = document.getElementById("dp");
+
  data.daily.push({
-  name:dn.value,
-  qty:+dq.value,
-  price:+dp.value
+  name: dnEl.value,
+  qty: +dqEl.value,
+  price: +dpEl.value
  });
+
  save();
  dailyUI();
 }
