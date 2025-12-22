@@ -541,15 +541,10 @@ function shortage2UI(){
   <td>${x.price}</td>
   <td>${x.place}</td>
   <td>
- <td>
- <button class="btn edit" onclick="editShortage2(${i})">✏️</button>
-</td>
-<td>
- <button class="btn del"
-  onclick="data.shortage2.splice(${i},1);save();shortage2UI()">
-  ✖
- </button>
-</td>
+   <button class="btn del"
+    onclick="data.shortage2.splice(${i},1);save();shortage2UI()">
+    ✖
+   </button>
   </td>
  </tr>
  `).join("")}
@@ -566,26 +561,7 @@ function addShortage2(){
  save();
  shortage2UI();
 }
-
-function editShortage2(i){
- let it = data.shortage2[i];
-
- let n = prompt("اسم المنتج", it.name);
- let q = +prompt("الكمية الناقصة", it.qty);
- let p = +prompt("السعر التقريبي", it.price);
- let l = prompt("المكان المتوفر فيه", it.place);
-
- if(n){
-  data.shortage2[i] = {
-   name: n,
-   qty: q,
-   price: p,
-   place: l
-  };
-  save();
-  shortage2UI();
- }
-}
 </script>
+
 </body>
 </html>
