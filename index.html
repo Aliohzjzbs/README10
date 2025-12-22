@@ -224,12 +224,16 @@ th{color:#38bdf8}
  <div>📊 نظام محاسبة من تطوير علي المضيوي  VIP</div>
 </header>
 
+
 <div class="navbar">
  <button onclick="show('dash')">لوحة التحكم</button>
  <button onclick="show('store')">المخزن</button>
  <button onclick="show('debts')">فلوس ليّا</button>
  <button onclick="show('maintenance')">أرباح الصيانة</button>
+<button onclick="show('daily')">📅 مبيعات اليوم</button>
+<button onclick="show('shortage2')">📉 نواقص المخزن</button>
 </div>
+
 
 <main id="content"></main>
 
@@ -254,18 +258,26 @@ function login(){
 
 const content=document.getElementById("content");
 
-let data=JSON.parse(localStorage.getItem("acc_data"))||{
- cash:0,store:[],debts:[],maintenance:[],shortage:[]
+let data = JSON.parse(localStorage.getItem("acc_data")) || {
+ cash: 0,
+ store: [],
+ debts: [],
+ maintenance: [],
+ shortage: [],
+ shortage2: [],
+ daily: []
 };
+data.shortage2 = data.shortage2 || [];
 function save(){localStorage.setItem("acc_data",JSON.stringify(data));}
 
-function show(s){
- if(s=="dash")dashboard();
- if(s=="store")storeUI();
- if(s=="shortage")shortageUI();
- if(s=="debts")debtsUI();
- if(s=="maintenance")maintUI();
- if(s=="cash")cashUI();
+function show(s) {
+ if (s === "dash") dashboard();
+ else if (s === "store") storeUI();
+ else if (s === "shortage") shortageUI();
+ else if (s === "shortage2") shortage2UI();
+ else if (s === "debts") debtsUI();
+ else if (s === "maintenance") maintUI();
+ else if (s === "daily") dailyUI();
 }
 
 /* Dashboard */
@@ -447,7 +459,133 @@ function storeSearch(val){
   row.style.display = name.includes(q) ? "" : "none";
  });
 }
-</script>
 
+function dailyUI(){
+ content.innerHTML=`
+ <h3>📅 مبيعات اليوم</h3>
+
+ <input id="dn" placeholder="اسم المنتج">
+ <input id="dq" placeholder="الكمية">
+ <input id="dp" placeholder="سعر البيع">
+
+ <button class="btn add" onclick="addDaily()">➕ إضافة</button>
+
+ <table>
+ <tr>
+  <th>المنتج</th>
+  <th>الكمية</th>
+  <th>السعر</th>
+  <th>الإجمالي</th>
+  <th>حذف</th>
+ </tr>
+
+ ${data.daily.map((x,i)=>`
+ <tr>
+  <td>${x.name}</td>
+  <td>${x.qty}</td>
+  <td>${x.price}</td>
+  <td>${x.qty * x.price}</td>
+  <td>
+   <button class="btn del"
+    onclick="data.daily.splice(${i},1);save();dailyUI()">
+    ✖
+   </button>
+  </td>
+ </tr>
+ `).join("")}
+ </table>
+
+ <div class="card">
+  <h4>إجمالي اليوم</h4>
+  <div class="big">
+   ${data.daily.reduce((a,b)=>a+(b.qty*b.price),0)} ج
+  </div>
+ </div>
+ `;
+}
+
+function addDaily(){
+ data.daily.push({
+  name:dn.value,
+  qty:+dq.value,
+  price:+dp.value
+ });
+ save();
+ dailyUI();
+}
+
+function shortage2UI(){
+ content.innerHTML=`
+ <h3>📉 نواقص المخزن</h3>
+
+ <input id="sn2" placeholder="اسم المنتج">
+ <input id="sq2" placeholder="الكمية الناقصة">
+ <input id="sp2" placeholder="السعر التقريبي">
+ <input id="sl2" placeholder="المكان المتوفر فيه">
+
+ <button class="btn add" onclick="addShortage2()">➕ إضافة</button>
+
+ <table>
+ <tr>
+  <th>المنتج</th>
+  <th>الكمية</th>
+  <th>السعر</th>
+  <th>المكان</th>
+  <th>حذف</th>
+ </tr>
+
+ ${data.shortage2.map((x,i)=>`
+ <tr>
+  <td>${x.name}</td>
+  <td>${x.qty}</td>
+  <td>${x.price}</td>
+  <td>${x.place}</td>
+  <td>
+ <td>
+ <button class="btn edit" onclick="editShortage2(${i})">✏️</button>
+</td>
+<td>
+ <button class="btn del"
+  onclick="data.shortage2.splice(${i},1);save();shortage2UI()">
+  ✖
+ </button>
+</td>
+  </td>
+ </tr>
+ `).join("")}
+ </table>
+ `;
+}
+function addShortage2(){
+ data.shortage2.push({
+  name: sn2.value,
+  qty: +sq2.value,
+  price: +sp2.value,
+  place: sl2.value
+ });
+ save();
+ shortage2UI();
+}
+
+function editShortage2(i){
+ let it = data.shortage2[i];
+
+ let n = prompt("اسم المنتج", it.name);
+ let q = +prompt("الكمية الناقصة", it.qty);
+ let p = +prompt("السعر التقريبي", it.price);
+ let l = prompt("المكان المتوفر فيه", it.place);
+
+ if(n){
+  data.shortage2[i] = {
+   name: n,
+   qty: q,
+   price: p,
+   place: l
+  };
+  save();
+  shortage2UI();
+ }
+}
+</script>
 </body>
 </html>
