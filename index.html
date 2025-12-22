@@ -226,19 +226,17 @@ th{color:#38bdf8}
 <div id="app" style="display:none">
 
 <header>
- <div>📊 نظام محاسبة من تطوير علي المضيوي  VIP</div>
+ <div>📊 نظام محاسبة من تطوير علي المضيوي VIP</div>
+ 
+ <div class="navbar">
+  <button onclick="show('dash')">لوحة التحكم</button>
+  <button onclick="show('store')">المخزن</button>
+  <button onclick="show('debts')">فلوس ليّا</button>
+  <button onclick="show('maintenance')">أرباح الصيانة</button>
+  <button onclick="show('daily')">📅 مبيعات اليوم</button>
+  <button onclick="show('shortage2')">📉 نواقص المخزن</button>
+ </div>
 </header>
-
-
-<div class="navbar">
- <button onclick="show('dash')">لوحة التحكم</button>
- <button onclick="show('store')">المخزن</button>
- <button onclick="show('debts')">فلوس ليّا</button>
- <button onclick="show('maintenance')">أرباح الصيانة</button>
-<button type="button" onclick="show('daily')">📅 مبيعات اليوم</button>
-<button onclick="show('shortage2')">📉 نواقص المخزن</button>
-</div>
-
 
 <main id="content"></main>
 
