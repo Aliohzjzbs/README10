@@ -6,6 +6,114 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
+
+
+/* ===== إحساس تطبيق محاسبة ===== */
+
+/* توحيد الخطوط والأوزان */
+body{
+ font-weight:500;
+ letter-spacing:.2px;
+}
+
+/* هيدر ثابت زي التطبيقات */
+header{
+ position:sticky;
+ top:0;
+ z-index:100;
+ border-bottom:1px solid #1e293b;
+}
+
+/* شريط الأقسام = تاب بار */
+.navbar{
+ background:#020617;
+ box-shadow:0 6px 20px rgba(0,0,0,.4);
+ border-bottom:1px solid #1e293b;
+}
+
+.navbar button{
+ background:linear-gradient(135deg,#1e293b,#020617);
+ border:1px solid #1e293b;
+ transition:.25s;
+}
+
+.navbar button:hover{
+ transform:translateY(-2px);
+ box-shadow:0 10px 25px rgba(0,0,0,.6);
+}
+
+/* الكروت المالية */
+.card{
+ background:linear-gradient(180deg,#020617,#111827);
+ border:1px solid #1e293b;
+ box-shadow:
+ 0 10px 30px rgba(0,0,0,.5),
+ inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.card h4{
+ font-size:15px;
+ text-transform:uppercase;
+ opacity:.8;
+}
+
+.big{
+ color:#22c55e;
+}
+
+/* المدخلات */
+input{
+ border:1px solid #1e293b;
+ transition:.2s;
+}
+
+input:focus{
+ outline:none;
+ border-color:#2563eb;
+ box-shadow:0 0 0 3px rgba(37,99,235,.25);
+}
+
+/* الجداول */
+table{
+ border-radius:14px;
+ overflow:hidden;
+}
+
+th{
+ background:#020617;
+ font-size:14px;
+ letter-spacing:.5px;
+}
+
+tr:hover td{
+ background:#020617;
+}
+
+/* الأزرار */
+.btn{
+ box-shadow:0 8px 20px rgba(0,0,0,.5);
+}
+
+.btn.add{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
+.btn.edit{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.btn.del{background:linear-gradient(135deg,#dc2626,#991b1b);}
+
+/* شاشة تسجيل الدخول */
+#login{
+ box-shadow:0 30px 80px rgba(0,0,0,.8);
+ border:1px solid #1e293b;
+}
+
+/* حركة خفيفة */
+button,input,.card,table{
+ transition:.25s ease;
+}
+
+
+
+
+
 :root{
  --accent:#2563eb;
  --accent2:#22c55e;
@@ -177,6 +285,7 @@ function dashboard(){
 /* Store */
 function storeUI(){
  content.innerHTML=`
+ <input placeholder="🔍 بحث عن منتج" oninput="storeSearch(this.value)">
  <h3>📦 المخزن</h3>
  <input id="p" placeholder="اسم الصنف">
  <input id="q" placeholder="الكمية">
@@ -253,6 +362,7 @@ function editShort(i){
 /* Debts */
 function debtsUI(){
  content.innerHTML=`
+ <input placeholder="🔍 بحث عن منتج" oninput="storeSearch(this.value)">
  <h3>💰 فلوس ليّا</h3>
  <input id="n" placeholder="الاسم">
  <input id="a" placeholder="المبلغ">
@@ -285,6 +395,7 @@ function editDebt(i){
 /* Maintenance */
 function maintUI(){
  content.innerHTML=`
+ <input placeholder="🔍 بحث عن منتج" oninput="storeSearch(this.value)">
  <h3>🧰 أرباح الصيانة</h3>
  <input id="pc" placeholder="اسم القطعة">
  <input id="c" placeholder="سعر  جملة">
@@ -322,8 +433,21 @@ function editMaint(i){
   save();maintUI();
  }
 }
+
+function normalize(txt){
+ return (txt||"").toString().toLowerCase();
+}
+
+function storeSearch(val){
+ let q = normalize(val);
+
+ document.querySelectorAll("table tr").forEach((row,i)=>{
+  if(i===0) return; // الهيدر
+  let name = normalize(row.cells[0].innerText);
+  row.style.display = name.includes(q) ? "" : "none";
+ });
+}
 </script>
 
 </body>
 </html>
-
