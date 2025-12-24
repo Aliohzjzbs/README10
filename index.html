@@ -208,13 +208,6 @@ th{color:#38bdf8}
  position:relative;
  z-index:200;
 }
- header{
- height:120px;
-}
-
-.navbar{
- margin-top:120px;
-                            }
 </style>
 </head>
 
@@ -240,8 +233,8 @@ th{color:#38bdf8}
   <button onclick="show('store')">المخزن</button>
   <button onclick="show('debts')">فلوس ليّا</button>
   <button onclick="show('maintenance')">أرباح الصيانة</button>
-  <button onclick="show('daily')">📅 مبيعات اليوم</button>
-  <button onclick="show('shortage2')">📉 نواقص المخزن</button>
+<button id="todayBtn">📅 مبيعات اليوم</button>
+<button onclick="show('shortage2')">📉 نواقص المخزن</button>
  </div>
 </header>
 
@@ -576,6 +569,116 @@ function addShortage2(){
  save();
  shortage2UI();
 }
+
+let dailySales = JSON.parse(localStorage.getItem("dailySales")) || [];
+let archiveSales = JSON.parse(localStorage.getItem("archiveSales")) || [];
+
+function saveDaily(){ localStorage.setItem("dailySales", JSON.stringify(dailySales)); }
+function saveArchive(){ localStorage.setItem("archiveSales", JSON.stringify(archiveSales)); }
+
+function dailyUI(){
+  content.innerHTML=`
+    <h3>📅 مبيعات اليوم</h3>
+    <input id="prodName" placeholder="اسم المنتج">
+    <input id="prodQty" placeholder="الكمية">
+    <input id="prodPrice" placeholder="سعر البيع">
+    <button class="btn add" onclick="addDaily()">➕ إضافة</button>
+
+    <table id="dailyTable">
+      <tr>
+        <th>المنتج</th>
+        <th>الكمية</th>
+        <th>السعر</th>
+        <th>الإجمالي</th>
+        <th>حذف</th>
+      </tr>
+    </table>
+
+    <div class="card">إجمالي اليوم: <span id="totalToday">0</span> ج</div>
+
+    <h3>📂 أرشيف المبيعات اليومية</h3>
+    <div id="archive"></div>
+  `;
+  renderDaily();
+  renderArchive();
+}
+function renderDaily(){
+  const table = document.getElementById("dailyTable");
+  table.innerHTML = `<tr>
+    <th>المنتج</th>
+    <th>الكمية</th>
+    <th>السعر</th>
+    <th>الإجمالي</th>
+    <th>حذف</th>
+  </tr>`;
+  let total = 0;
+  dailySales.forEach((p,i)=>{
+    let row = table.insertRow();
+    row.insertCell(0).innerText = p.name;
+    row.insertCell(1).innerText = p.qty;
+    row.insertCell(2).innerText = p.price;
+    row.insertCell(3).innerText = p.qty*p.price;
+    total += p.qty*p.price;
+
+    let delBtn = document.createElement("button");
+    delBtn.className="btn del";
+    delBtn.innerText="✖";
+    delBtn.onclick = ()=>{
+      dailySales.splice(i,1);
+      saveDaily();
+      renderDaily();
+    };
+    row.insertCell(4).appendChild(delBtn);
+  });
+  document.getElementById("totalToday").innerText = total;
+}
+
+function addDaily(){
+  const n = document.getElementById("prodName").value;
+  const q = +document.getElementById("prodQty").value;
+  const p = +document.getElementById("prodPrice").value;
+  if(!n || !q || !p) return alert("ادخل كل البيانات");
+  dailySales.push({name:n, qty:q, price:p});
+  saveDaily();
+  
+  renderDaily();
+  document.getElementById("prodName").value="";
+  document.getElementById("prodQty").value="";
+  document.getElementById("prodPrice").value="";
+}
+
+function renderArchive(){
+  const archDiv = document.getElementById("archive");
+  archDiv.innerHTML="";
+  archiveSales.forEach(day=>{
+    let div = document.createElement("div");
+    div.className="card";
+    let html = `<h4>${day.date}</h4><ul>`;
+    day.items.forEach(item=>{
+      html += `<li>${item.name} | ${item.qty} | ${item.price} | المجموع: ${item.qty*item.price}</li>`;
+    });
+    html += `</ul>`;
+    div.innerHTML = html;
+    archDiv.appendChild(div);
+  });
+}
+
+document.getElementById("todayBtn").addEventListener("click", ()=>{
+  if(dailySales.length===0) return alert("لا يوجد مبيعات اليوم");
+  const today = new Date().toLocaleDateString();
+  archiveSales.push({date:today, items:[...dailySales]});
+  saveArchive();
+  dailySales=[];
+  saveDaily();
+  renderDaily();
+  renderArchive();
+});
+
+
+document.getElementById("todayBtn").addEventListener("click", ()=>{
+  dailyUI();  // هذا يفتح صفحة مبيعات اليوم داخل main
+});
+
 </script>
 
 </body>
