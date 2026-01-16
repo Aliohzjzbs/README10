@@ -679,18 +679,11 @@ document.getElementById("todayBtn").addEventListener("click", ()=>{
   dailyUI();  // هذا يفتح صفحة مبيعات اليوم داخل main
 });
 
-// 🔁 ترحيل البيانات القديمة لمبيعات اليوم
-if (data.daily && data.daily.length > 0 && dailySales.length === 0) {
-  dailySales = data.daily.map(x => ({
-    name: x.name,
-    qty: x.qty,
-    price: x.price
-  }));
-  localStorage.setItem("dailySales", JSON.stringify(dailySales));
-
-  // اختياري: امسح القديم بعد النقل
-  delete data.daily;
-  localStorage.setItem("acc_data", JSON.stringify(data));
+// شغّل مرة واحدة فقط في console
+let oldData = JSON.parse(localStorage.getItem("acc_data"));
+if(oldData && oldData.daily && oldData.daily.length > 0){
+    localStorage.setItem("dailySales", JSON.stringify(oldData.daily));
+    alert("تم ترحيل بيانات المبيعات القديمة!");
 }
 
  
